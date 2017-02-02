@@ -136,7 +136,8 @@ namespace TcpserverCore
                 connection,SLOT(sendMessage(TcpHeaderFrameHelper::MessageType, qint32, const QByteArray &)));
         
         connect(connection,&TcpConnectionHandler::socketDisconneted, this, &TcpServerListendCore::deleteConnection);
-        connect(workerThread, &QThread::finished, workerThread, &QThread::quit);
+        
+        connect(connection, &QObject::destroyed, workerThread, &QThread::quit);
         connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
         
         connect(this, &TcpServerListendCore::requestGetConnectionInform, connection, &TcpConnectionHandler::replyGetConnectionInform);

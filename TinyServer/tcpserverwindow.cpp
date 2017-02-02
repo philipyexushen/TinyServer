@@ -360,9 +360,6 @@ namespace MainWindows
         qRegisterMetaType<quint16>("quint16");
         QThread *workerThread = new QThread;
         
-        connect(workerThread, &QThread::finished, workerThread, &QThread::quit);
-        connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
-        
         TcpServerListendCore *newServer = new TcpServerListendCore;
         
         connect(newServer,SIGNAL(updateServer(TcpHeaderFrameHelper::MessageType, const QByteArray &,const QString &, quint16)),
@@ -373,6 +370,9 @@ namespace MainWindows
         connect(this, &TcpServerWindow::requestDisconnection, newServer,&TcpServerListendCore::deleteConnection);
         connect(this, &TcpServerWindow::requestResetPulse,newServer,&TcpServerListendCore::replyResetPulse);
         connect(newServer,&TcpServerListendCore::allDisConnected,this,&TcpServerWindow::replyAllDisConnected);
+        
+        connect(newServer, &QObject::destroyed, workerThread, &QThread::quit);
+        connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
         
         newServer->moveToThread(workerThread);
         workerThread->start();

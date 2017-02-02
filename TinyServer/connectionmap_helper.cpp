@@ -38,7 +38,8 @@ namespace TcpserverCore
     {
         QThread *workerThread = new QThread;
         ConnectionReader *reader = new ConnectionReader(map);
-        QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::quit);
+        
+        QObject::connect(reader,&QObject::destroyed, workerThread,&QThread::quit);
         QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::deleteLater);
         
         reader->moveToThread(workerThread);
@@ -61,7 +62,8 @@ namespace TcpserverCore
         
         QThread *workerThread = new QThread;
         ConnectionReader *reader = new ConnectionReader(map);
-        QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::quit);
+        
+        QObject::connect(reader,&QObject::destroyed, workerThread,&QThread::quit);
         QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::deleteLater);
         
         reader->moveToThread(workerThread);
@@ -83,7 +85,8 @@ namespace TcpserverCore
         
         QThread *workerThread = new QThread;
         ConnectionReader *reader = new ConnectionReader(map);
-        QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::quit);
+        
+        QObject::connect(reader,&QObject::destroyed, workerThread,&QThread::quit);
         QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::deleteLater);
         
         reader->moveToThread(workerThread);
@@ -104,7 +107,8 @@ namespace TcpserverCore
         
         QThread *workerThread = new QThread;
         ConnectionReader *reader = new ConnectionReader(map);
-        QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::quit);
+        
+        QObject::connect(reader,&QObject::destroyed, workerThread,&QThread::quit);
         QObject::connect(workerThread,&QThread::finished, workerThread,&QThread::deleteLater);
         
         reader->moveToThread(workerThread);
