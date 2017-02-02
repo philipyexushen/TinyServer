@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/icon.png</file>
+        <file>images/aboutMe.png</file>
+        <file>images/clipboard.png</file>
+        <file>images/close.png</file>
+        <file>images/closeBlack.png</file>
+        <file>images/exit.png</file>
+        <file>images/newPort.png</file>
+        <file>images/open.png</file>
+        <file>images/printPDF.png</file>
+        <file>images/saveSettings.png</file>
+        <file>images/test.png</file>
+        <file>images/testing.png</file>
+        <file>images/pause.png</file>
+        <file>images/restart.png</file>
+        <file>images/stop.png</file>
+    </qresource>
+</RCC>

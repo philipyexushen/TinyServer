@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>serverWindow</class>
+ <widget class="QMainWindow" name="serverWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>795</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>服务器</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="splitter">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QTextEdit" name="msgView">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>400</height>
+             </size>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_2" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="portLabel">
+           <property name="text">
+            <string>本机IP地址：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="localAddressEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="openPortListBtn">
+           <property name="text">
+            <string>当前监听端口列表</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clearScreenBtn">
+           <property name="text">
+            <string>清屏</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveMsgBtn">
+           <property name="text">
+            <string>导出聊天记录</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>795</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="createNewServerAction"/>
+    <addaction name="saveAsPdfAction"/>
+    <addaction name="readAndStartAct"/>
+    <addaction name="saveCurrentSettingAct"/>
+    <addaction name="separator"/>
+    <addaction name="closeAct"/>
+    <addaction name="exitServerAct"/>
+   </widget>
+   <widget class="QMenu" name="runningSettingMenu">
+    <property name="title">
+     <string>运行设置</string>
+    </property>
+    <addaction name="allowMinimizeToTrayAct"/>
+    <addaction name="allowTaryAct"/>
+    <addaction name="separator"/>
+    <addaction name="autoStartAct"/>
+    <addaction name="separator"/>
+    <addaction name="broadcastOpenAct"/>
+    <addaction name="pulseEditAct"/>
+   </widget>
+   <widget class="QMenu" name="aboutMenu">
+    <property name="title">
+     <string>关于我</string>
+    </property>
+    <addaction name="aboutMeAct"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="runningSettingMenu"/>
+   <addaction name="aboutMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="conectionStatusBar">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>25</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>25</height>
+    </size>
+   </property>
+  </widget>
+  <action name="createNewServerAction">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/newPort.png</normaloff>:/images/newPort.png</iconset>
+   </property>
+   <property name="text">
+    <string>创建新的监听端口</string>
+   </property>
+   <property name="toolTip">
+    <string>创建新的监听端口</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="saveAsPdfAction">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/printPDF.png</normaloff>:/images/printPDF.png</iconset>
+   </property>
+   <property name="text">
+    <string>导出聊天记录到pdf</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="closeAct">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/close.png</normaloff>:/images/close.png</iconset>
+   </property>
+   <property name="text">
+    <string>关闭服务器</string>
+   </property>
+   <property name="toolTip">
+    <string>关闭服务器</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Q</string>
+   </property>
+  </action>
+  <action name="aboutMeAct">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/aboutMe.png</normaloff>:/images/aboutMe.png</iconset>
+   </property>
+   <property name="text">
+    <string>关于Philip</string>
+   </property>
+   <property name="toolTip">
+    <string>关于Philip</string>
+   </property>
+  </action>
+  <action name="allowMinimizeToTrayAct">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>最小化到托盘图标</string>
+   </property>
+   <property name="toolTip">
+    <string>最小化到托盘图标</string>
+   </property>
+  </action>
+  <action name="allowTaryAct">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>允许托盘图标</string>
+   </property>
+   <property name="toolTip">
+    <string>允许托盘图标</string>
+   </property>
+  </action>
+  <action name="saveCurrentSettingAct">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/saveSettings.png</normaloff>:/images/saveSettings.png</iconset>
+   </property>
+   <property name="text">
+    <string>保存当前设置</string>
+   </property>
+   <property name="toolTip">
+    <string>保存当前设置</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="autoStartAct">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>程序自启动</string>
+   </property>
+   <property name="toolTip">
+    <string>程序自启动</string>
+   </property>
+  </action>
+  <action name="exitServerAct">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/exit.png</normaloff>:/images/exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>退出服务器</string>
+   </property>
+   <property name="toolTip">
+    <string>退出服务器</string>
+   </property>
+  </action>
+  <action name="pulseEditAct">
+   <property name="text">
+    <string>设定服务器心跳时间</string>
+   </property>
+   <property name="toolTip">
+    <string>设定服务器心跳时间</string>
+   </property>
+  </action>
+  <action name="readAndStartAct">
+   <property name="icon">
+    <iconset resource="icon.qrc">
+     <normaloff>:/images/open.png</normaloff>:/images/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>读取上一次设置并启动</string>
+   </property>
+   <property name="toolTip">
+    <string>读取上一次设置并启动</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="broadcastOpenAct">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>开启端口广播</string>
+   </property>
+   <property name="toolTip">
+    <string>开启端口广播</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="icon.qrc"/>
+ </resources>
+ <connections/>
+</ui>
