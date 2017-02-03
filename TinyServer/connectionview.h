@@ -26,8 +26,8 @@ namespace MainWindows
     {
         Q_OBJECT
     signals:
-        void requestDisconnection(quint16 port, qintptr target);
-        void requestTestConnection(quint16 port, qintptr target, const QString msg);
+        void requestDisconnection(quint16 port, qint32 target);
+        void requestTestConnection(quint16 port, qint32 target, const QString msg);
         void newConnectionComming(const QString &address);
     public slots:
         void replyDisconnectTargetsAct();
@@ -43,7 +43,7 @@ namespace MainWindows
         void updateConnectionList(ConnectionViewItem *item);
         void updateRemark(qint32 descriptor, const QString &username);
     public:
-        using DesciptorIndexMap = QMap<qintptr,ConnectionViewItem *>;
+        using DesciptorIndexMap = QMap<qint32,ConnectionViewItem *>;
         
         explicit ConnectionView(QWidget *parent = 0);
         ~ConnectionView() = default;
@@ -76,7 +76,7 @@ namespace MainWindows
         
         QScopedPointer<ConsumerHelper> _consumerHelper;
         
-        QList<QPair<quint16,qintptr>> selectedPortsandDescriptors;
+        QList<QPair<quint16,qint32>> selectedPortsandDescriptors;
         QSharedPointer<MsgSendEditor> msgSendingEditor;
         QPoint origin;
         

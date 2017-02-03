@@ -8,6 +8,7 @@
 #include <QWaitCondition>
 #include <QSharedPointer>
 #include <QMutexLocker>
+#include <QDebug>
 
 namespace MainWindows
 {

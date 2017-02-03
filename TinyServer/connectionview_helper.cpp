@@ -1,7 +1,6 @@
 ﻿#include <QDebug>
 #include <QTime>
 #include <QTreeWidgetItem>
-
 #include "tcpserverwindow.h"
 
 namespace ConnectionViewHelper

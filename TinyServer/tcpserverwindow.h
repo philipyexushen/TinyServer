@@ -96,12 +96,12 @@ namespace MainWindows
         void serverPaused(quint16 port);
         void serverWakeUp(quint16 port);
         void newServerStarted(const QString &protocol, quint16 port);
-        void requestDisconnection(qintptr target,qint32 connectionIndex);
+        void requestDisconnection(qint32 target,qint32 connectionIndex);
         void allServerCleared();
     public slots:
         void openPortEditor();
         bool createNewServer(const unsigned short port = 1088);
-        void updateView(TcpHeaderFrameHelper::MessageType messageType,const QByteArray &bytes, const QString &userName, quint16 port);
+        void updateView(TcpHeaderFrameHelper::MessageType messageType,const QByteArray &bytes, const QString &userName, quint16 port, qint32 index);
         void updateView(const QString &msg);
         void saveAsPdfFile();
         void clearScreen();
@@ -110,7 +110,7 @@ namespace MainWindows
         void replypulseSettingTriggered();
         void replyAllowBroadcastTriggered();
         void replyDisconnection(quint16 port, qint32 target);
-        void replyTestConnection(quint16 port, qintptr target,const QString &msg);
+        void replyTestConnection(quint16 port, qint32 target,const QString &msg);
         void updateConnectionList(const QString &address);
         void replyExit(){ exit(0); }
         void writeSettings();

@@ -311,25 +311,27 @@ namespace MainWindows
         }
     }
     
-    void TcpServerWindow::updateView(TcpHeaderFrameHelper::MessageType messageType, const QByteArray &bytes,const QString &userName, quint16 port)
+    void TcpServerWindow::updateView(TcpHeaderFrameHelper::MessageType messageType, const QByteArray &bytes, const QString &userName, quint16 port, qint32 index)
     {
         TcpServerListendCore *source = qobject_cast<TcpServerListendCore *>(sender());
-        
-        QTextCodec *codec = QTextCodec::codecForName("GB18030");
-        QTextDecoder *decoder = codec->makeDecoder();
-        
-        QString msg;
-        
-        msg += QTime::currentTime().toString() + QString::fromLocal8Bit("  监听端口: %1\n").arg(port);
-        if (!userName.isEmpty())
-            msg += userName + ": ";
-        msg += decoder->toUnicode(bytes) + "\n";
-        
-        updateView(msg);
-        delete decoder;
-        
         qRegisterMetaType<TcpHeaderFrameHelper::MessageType>("TcpHeaderFrameHelper::MessageType");
         qRegisterMetaType<QByteArray>("QByteArray");
+        
+        if (messageType != TcpHeaderFrameHelper::MessageType::DeviceLogIn)
+        {
+            QTextCodec *codec = QTextCodec::codecForName("GB18030");
+            QTextDecoder *decoder = codec->makeDecoder();
+            
+            QString msg;
+            
+            msg += QTime::currentTime().toString() + QString::fromLocal8Bit("  监听端口: %1\n").arg(port);
+            if (!userName.isEmpty())
+                msg += userName + ": ";
+            msg += decoder->toUnicode(bytes) + "\n";
+            
+            updateView(msg);
+            delete decoder;
+        }
         
         if (bAllowBroadCast)
         {
@@ -340,7 +342,7 @@ namespace MainWindows
                     continue;
                 QMetaObject::invokeMethod(server, "requestSendData",Qt::QueuedConnection,
                                           Q_ARG(TcpHeaderFrameHelper::MessageType,messageType),
-                                          Q_ARG(qint32,-1),
+                                          Q_ARG(qint32,index),
                                           Q_ARG(QByteArray,bytes));
             }
         }
@@ -348,8 +350,9 @@ namespace MainWindows
     
     void TcpServerWindow::updateView(const QString &msg)
     {
+        msgView->moveCursor(QTextCursor::MoveOperation::End);
         msgView->insertPlainText(msg);
-        msgView->moveCursor(QTextCursor::End);
+        msgView->moveCursor(QTextCursor::MoveOperation::End);
         msgView->update();
     }
     
@@ -362,8 +365,8 @@ namespace MainWindows
         
         TcpServerListendCore *newServer = new TcpServerListendCore;
         
-        connect(newServer,SIGNAL(updateServer(TcpHeaderFrameHelper::MessageType, const QByteArray &,const QString &, quint16)),
-                this,SLOT(updateView(TcpHeaderFrameHelper::MessageType, const QByteArray &,const QString&,quint16)));
+        connect(newServer,SIGNAL(updateServer(TcpHeaderFrameHelper::MessageType, const QByteArray &,const QString &, quint16, qint32)),
+                this,SLOT(updateView(TcpHeaderFrameHelper::MessageType, const QByteArray &,const QString&,quint16, qint32)));
         connect(newServer,SIGNAL(updateServer(const QString &)),
                 this,SLOT(updateView(const QString&)));
         
@@ -463,10 +466,9 @@ namespace MainWindows
         }
     }
     
-    void TcpServerWindow::replyTestConnection(quint16 port, qintptr target, const QString &message)
+    void TcpServerWindow::replyTestConnection(quint16 port, qint32 target, const QString &message)
     {
         qRegisterMetaType<quint16>("quint16");
-        qRegisterMetaType<qintptr>("qintptr");
         qRegisterMetaType<TcpConnectionHandler *>("TcpConnectionHandler *"); 
         
         if (serverMap.contains(port))
@@ -474,7 +476,7 @@ namespace MainWindows
             bool testOk = false;
             QMetaObject::invokeMethod(serverMap[port],"replyTestConnection",Qt::BlockingQueuedConnection,
                                       Q_RETURN_ARG(bool, testOk),
-                                      Q_ARG(qintptr,target),
+                                      Q_ARG(qint32,target),
                                       Q_ARG(const QString &,message));
             if (!testOk)
                 QMessageBox::warning(this,QString::fromLocal8Bit("服务器测试"),QString::fromLocal8Bit("给指定链接发送信息失败"));
@@ -734,6 +736,7 @@ namespace MainWindows
     
     void ConnectionView::replyTestConnection()
     {
+        selectedPortsandDescriptors.clear();
         for(const auto &item : selectedItems())
             selectedPortsandDescriptors.append({item->text(LISTENEDPORT).toUShort(),item->text(DESCRIPTOR).toInt()});
         

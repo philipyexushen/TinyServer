@@ -35,20 +35,22 @@ namespace TcpserverCore
         struct TcpHeaderFrame
         {
             //用于标识报文的类型
-            int messageType;
+            qint32 messageType;
             //用于标识发送者的特征码，用于校验
             qint32 featureCode;
             //信息来源对应特征码
-			int sourceFeatureCode;
+			qint32 sourceFeatureCode;
             //用于标识报文的长度，用于校验
-            int messageLength;
+            qint32 messageLength;
         };
         
         static QByteArray bindHeaderAndDatagram(const TcpHeaderFrame &header,const QByteArray &realDataBytes);
         static void praseHeaderAndDatagram(const QByteArray &dataBytes,TcpHeaderFrame &headerFrame,QByteArray &realDataBytes);
+        static void praseHeader(const QByteArray &datagram, TcpHeaderFrame &headerFrame);
         
-        static unsigned qByteArrayToInt(QByteArray bytes);
-        static void unsignedToQByteArray(unsigned num, QByteArray &bytes);
+        static quint32 qByteArrayToUnsignedInt(QByteArray bytes);
+        static void unsignedToQByteArray(quint32 num, QByteArray &bytes);
+        static qint32 sizeofHeaderFrame();;
     };
     
 }
