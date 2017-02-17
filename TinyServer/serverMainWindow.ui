@@ -110,7 +110,7 @@
          <item>
           <widget class="QPushButton" name="saveMsgBtn">
            <property name="text">
-            <string>导出聊天记录</string>
+            <string>导出记录</string>
            </property>
           </widget>
          </item>

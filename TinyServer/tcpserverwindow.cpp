@@ -153,8 +153,12 @@ namespace MainWindows
         
         for(qint32 i = 0; i!= settingsSumOfPort;i++)
         {
-            settingsPortList.append(appBaseSettings.value(QString::fromLocal8Bit("/ServerPort%1:").arg(i)).toInt());
-            settingsPulseList.append(appBaseSettings.value(QString::fromLocal8Bit("/ServerPulse%1:").arg(i)).toInt());
+            QString key = QString::fromLocal8Bit("/ServerPort%1:").arg(i);
+            
+            settingsPortList.append(static_cast<quint16>(appBaseSettings.value(key).toInt()));
+            
+            key = QString::fromLocal8Bit("/ServerPulse%1:").arg(i);
+            settingsPulseList.append(appBaseSettings.value(key).toInt());
         }
         clearServerMap();
     }

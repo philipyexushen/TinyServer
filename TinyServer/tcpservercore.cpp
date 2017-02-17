@@ -22,39 +22,6 @@ using ConnectionViewHelper::UpdateRemarkProducer;
 
 namespace TcpserverCore
 {
-    /// 用于转换handleError的错误
-    QString getSocketErrorType(QAbstractSocket::SocketError error)
-    {
-        static QMap<QAbstractSocket::SocketError,QString> errorMap
-        { 
-            { QAbstractSocket::ConnectionRefusedError,             "ConnectionRefusedError"          }, 
-            { QAbstractSocket::RemoteHostClosedError,              "RemoteHostClosedError"           },
-            { QAbstractSocket::HostNotFoundError,                  "HostNotFoundError"               },
-            { QAbstractSocket::SocketAccessError,                  "SocketAccessError"               },
-            { QAbstractSocket::SocketResourceError,                "SocketResourceError"             },
-            { QAbstractSocket::SocketTimeoutError,                 "SocketTimeoutError"              },
-            { QAbstractSocket::DatagramTooLargeError,              "DatagramTooLargeError"           },
-            { QAbstractSocket::NetworkError,                       "NetworkError"                    },
-            { QAbstractSocket::AddressInUseError,                  "AddressInUseError"               },
-            { QAbstractSocket::SocketAddressNotAvailableError,     "SocketAddressNotAvailableError"  },
-            { QAbstractSocket::UnsupportedSocketOperationError,    "UnsupportedSocketOperationError" },
-            { QAbstractSocket::ProxyAuthenticationRequiredError,   "ProxyAuthenticationRequiredError"},
-            { QAbstractSocket::SslHandshakeFailedError,            "SslHandshakeFailedError"         },
-            { QAbstractSocket::UnfinishedSocketOperationError,     "UnfinishedSocketOperationError"  },
-            { QAbstractSocket::ProxyConnectionRefusedError,        "ProxyConnectionRefusedError"     },
-            { QAbstractSocket::ProxyConnectionClosedError,         "ProxyConnectionClosedError"      },
-            { QAbstractSocket::ProxyConnectionTimeoutError,        "ProxyConnectionTimeoutError"     },
-            { QAbstractSocket::ProxyNotFoundError,                 "ProxyNotFoundError"              },
-            { QAbstractSocket::ProxyProtocolError,                 "ProxyProtocolError"              },
-            { QAbstractSocket::OperationError,                     "OperationError"                  },
-            { QAbstractSocket::SslInternalError,                   "SslInternalError"                },
-            { QAbstractSocket::SslInvalidUserDataError,            "SslInvalidUserDataError"         },
-            { QAbstractSocket::TemporaryError ,                    "TemporaryError"                  },
-            { QAbstractSocket::UnknownSocketError,                 "UnknownSocketError"              }
-        };
-        return errorMap[error];
-    }
-    
     /// IPV6点分十进制转化方法
     QString exchangeIPV6ToDottedDecimal(const Q_IPV6ADDR &ipv6)
     {
@@ -96,7 +63,7 @@ namespace TcpserverCore
         if (!bSrandSet)
         {
             QTime time = QTime::currentTime();
-            qsrand(time.msec()+time.second()*1000);
+            qsrand(static_cast<uint>(time.msec()+time.second()*1000));
             bSrandSet = true;
             indexBase =  qrand() % 65536;
         }
@@ -248,27 +215,13 @@ namespace TcpserverCore
     /// 当你调用read()函数时，它们仅仅返回已可用的数据；当你调用write()函数时，它们仅仅将写入列入计划列表稍后执行。只有返回事件循环的时候，真正的读写才会执行
     /// readyRead信号一旦发出，并不代表可以全部读取其他进程write到socket的全部信息（根本根本不知道write进行了几次）
     /// 相反，readyRead信号可能多次触发，bytesAvailable()随着调用次数的改变会不同，意味着IO缓冲区在不断变化
-    /// 比如读取25755长度的信息，socket，如果执行下面这个槽函数将会产生如下结果：
-    /// nAvailable:  1440
-    /// headerFrame length:  35479
-    /// nAvailable:  7164
-    /// nAvailable:  36
-    /// nAvailable:  2880
-    /// nAvailable:  1368
-    /// nAvailable:  72
-    /// nAvailable:  1440
-    /// nAvailable:  1428
-    /// nAvailable:  6678
-    /// nAvailable:  3270
-    /// nAvailable:  826
-    /// nAvailable:  2030
-    /// nAvailable:  18
-    /// nAvailable:  2048
-    /// nAvailable:  778
-    /// nAvailable:  2844
-    /// nAvailable:  474
-    /// nAvailable:  701
-    /// _currentRead:  35495
+    /// 比如读取3357长度的信息，socket，如果执行下面这个槽函数将会产生如下结果：
+    /// nAvailable:  1942
+    /// headerFrame length:  3357
+    /// nAvailable:  2534
+    /// nAvailable:  3357
+    /// nAvailable:  3420
+    /// _currentRead:  3420
     /// 所以传输信息时必须在头帧上添加数据长度信息，在数据长度信息准确的情况下，读取全部信息
     /// 并且注意QIODevice允许的读取最大长度是64位的，而QByteArray最多只能到uint
     qint64 TcpServerSocketCore::dataReceiver()
@@ -276,6 +229,8 @@ namespace TcpserverCore
         qint32 nRead = 0;
         qint64 readReturn;
         QByteArray bytes;
+        
+        _isReading = true;
 
         _currentRead = bytesAvailable();
         //qDebug () << "nAvailable: " << _currentRead;
@@ -283,67 +238,82 @@ namespace TcpserverCore
         if (_currentRead < TcpHeaderFrameHelper::sizeofHeaderFrame())
             return 0;
         
-        if (!_waitingForWholeData)
+        while (_currentRead >= TcpHeaderFrameHelper::sizeofHeaderFrame())
         {
-            bytes.resize(TcpHeaderFrameHelper::sizeofHeaderFrame());
-            readReturn = read(bytes.data(), TcpHeaderFrameHelper::sizeofHeaderFrame());
+            if (!_waitingForWholeData)
+            {
+                bytes.resize(TcpHeaderFrameHelper::sizeofHeaderFrame());
+                readReturn = read(bytes.data(), TcpHeaderFrameHelper::sizeofHeaderFrame());
+                
+                if (readReturn == -1)
+                    return -1;
+                nRead += readReturn;
+                
+                TcpHeaderFrameHelper::praseHeader(bytes, _headerFrame);
+                _targetLength = _headerFrame.messageLength + TcpHeaderFrameHelper::sizeofHeaderFrame();
+                //qDebug () << "headerFrame length: " << _headerFrame.messageLength;
+            }
             
-            if (readReturn == -1)
-                return -1;
-            nRead += readReturn;
-            
-            TcpHeaderFrameHelper::praseHeader(bytes, _headerFrame);
-            _targetLength = _headerFrame.messageLength + TcpHeaderFrameHelper::sizeofHeaderFrame();
-            //qDebug () << "headerFrame length: " << _headerFrame.messageLength;
+            if (_currentRead >= _targetLength)
+            {
+                qint32 length = _targetLength - TcpHeaderFrameHelper::sizeofHeaderFrame();
+                bytes.resize(length);
+                readReturn = read(bytes.data(), length);
+                
+                if (readReturn == -1)
+                    return -1;
+                nRead += readReturn;
+                
+                if (_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::DeviceLogIn))
+                {        
+                    QTextCodec *codec = QTextCodec::codecForName("GB18030");
+                    QTextDecoder *decoder = codec->makeDecoder();
+                    
+                    //把登陆信息直接设定为用户名记录
+                    userName = decoder->toUnicode(bytes);
+                    emit loginChecked();
+                    emit clientRemarkUpdate(userName);
+                    emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::DeviceLogIn, bytes);
+                    
+                    delete decoder;
+                }
+                else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::PulseFacility))
+                {
+                    //回应心跳包
+                    replySendData(TcpHeaderFrameHelper::MessageType::ACKPulse, _headerFrame.featureCode, -1, QString());
+                }
+                else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::PlainMessage)
+                        ||_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::ServerTest))
+                {
+                    emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::PlainMessage, bytes);
+                    //一个客户端的套接字的信息发生改变，立马广播到服务器和其他客户端
+                }
+                else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::Coordinate))
+                {
+                    qDebug() << "coordinate";
+                    emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::Coordinate, bytes);
+                }
+                else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::Help))
+                {
+                    qDebug() << "fuck";
+                    emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::Help, bytes);
+                }
+                //qDebug () << "_currentRead: " << _currentRead;
+                
+                _waitingForWholeData = false;
+                _currentRead -= _targetLength;
+                
+                if(_currentRead == 0)
+                    _isReading = false;
+            }
+            //如果不等于headerFrame.messageLength，说明还没读完，继续读取
+            else
+            {
+                _waitingForWholeData = true;
+                break;
+            }
         }
         
-        if (_currentRead >= _targetLength)
-        {
-            qint32 length = _targetLength - TcpHeaderFrameHelper::sizeofHeaderFrame();
-            bytes.resize(length);
-            readReturn = read(bytes.data(), length);
-            
-            if (readReturn == -1)
-                return -1;
-            nRead += readReturn;
-            
-            if (_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::DeviceLogIn))
-            {        
-                QTextCodec *codec = QTextCodec::codecForName("GB18030");
-                QTextDecoder *decoder = codec->makeDecoder();
-                
-                //把登陆信息直接设定为用户名记录
-                userName = decoder->toUnicode(bytes);
-                emit loginChecked();
-                emit clientRemarkUpdate(userName);
-                emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::DeviceLogIn, bytes);
-                
-                delete decoder;
-            }
-            else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::PulseFacility))
-            {
-                
-            }
-            else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::PlainMessage)
-                    ||_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::ServerTest))
-            {
-                emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::PlainMessage, bytes);
-                //一个客户端的套接字的信息发生改变，立马广播到服务器和其他客户端
-            }
-            else if(_headerFrame.messageType == static_cast<qint32>(TcpHeaderFrameHelper::MessageType::Coordinate))
-            {
-                emit socketMessageBoardcast(TcpHeaderFrameHelper::MessageType::Coordinate, bytes);
-            }
-            //qDebug () << "_currentRead: " << _currentRead;
-            
-            _waitingForWholeData = false;
-            _currentRead -= _targetLength;
-        }
-        //如果不等于headerFrame.messageLength，说明还没读完，继续读取
-        else
-        {
-            _waitingForWholeData = true;
-        }
         return nRead;
     }
     
@@ -351,6 +321,9 @@ namespace TcpserverCore
     qint64 TcpServerSocketCore::replySendData(
             TcpHeaderFrameHelper::MessageType messageType, qint32 featureCode, qint32 sourceFeatureCode,  const QByteArray &bytes)
     {
+        if (messageType == TcpHeaderFrameHelper::MessageType::PulseFacility && _isReading)
+            return 0;
+        
         qint64 ret = -1;
         
         TcpHeaderFrameHelper::TcpHeaderFrame header;
@@ -362,6 +335,10 @@ namespace TcpserverCore
         QByteArray packingBytes =TcpHeaderFrameHelper::bindHeaderAndDatagram(header,bytes);
                                                
         ret = write(packingBytes,packingBytes.size());
+        
+        if (messageType == TcpHeaderFrameHelper::MessageType::Coordinate)
+            qDebug() << "coordinate send";
+        
         return ret;
     }
     
@@ -416,8 +393,8 @@ namespace TcpserverCore
         connect(pulseTimer.data(), &QTimer::timeout, this, &TcpConnectionHandler::replyPulseTimeOut);
         pulseTimer->start(PULSEINTERVAL);
         
-        loginCheckTimer.reset(new QTimer);
-        loginCheckTimer->singleShot(LOGINCHECK_TIMEOUT, this, SLOT(handleLoginTimeout()));
+        
+        QTimer::singleShot(LOGINCHECK_TIMEOUT, this, SLOT(handleLoginTimeout()));
                
         _secondsCounter.reset(new QTimer);
         _interval = 1000;
@@ -457,8 +434,6 @@ namespace TcpserverCore
     {
         if(!bLoginCheckIn)
         {
-            loginCheckTimer->stop();
-            loginCheckTimer.reset();
             emit socketDisconneted(getAllocateIndex(), _thisAllocateIndex);//超过登陆确认间隔，关闭套接字
         }
     }
@@ -467,8 +442,6 @@ namespace TcpserverCore
     void TcpConnectionHandler::handleLoginChecked()
     {
         bLoginCheckIn = true;
-        loginCheckTimer->stop();
-        loginCheckTimer.reset();
     }
     
     /// 响应心跳包的更改
@@ -484,6 +457,8 @@ namespace TcpserverCore
     /// 响应心跳包超时
     void TcpConnectionHandler::replyPulseTimeOut()noexcept
     {
+        //TODO: 如果设备可以响应信息，那么就可以在服务器上做完整的心跳包设施了！
+        
         //qDebug() << "Connection: in thread " <<  QThread::currentThreadId();
         auto time(QDateTime::currentDateTime());
         auto ret(time.toString());
@@ -493,9 +468,9 @@ namespace TcpserverCore
     }
     
     /// 处理连接错误
-    void TcpConnectionHandler::handleErrors(QAbstractSocket::SocketError error)
+    void TcpConnectionHandler::handleErrors(QAbstractSocket::SocketError)
     {
-        QString errorString = QString::fromLocal8Bit("####SocketError:") + getSocketErrorType(error) + QString::fromLocal8Bit("\n");
+        QString errorString = QString::fromLocal8Bit("####SocketError:") + socket->errorString() + QString::fromLocal8Bit("\n");
         QTextCodec *codec = QTextCodec::codecForName("GB18030");
         QByteArray datagram(codec->fromUnicode(errorString));
         
@@ -515,7 +490,7 @@ namespace TcpserverCore
         auto peerAddress(socket->peerAddress());
         auto connectioType(socket->socketType());
         auto port(socket->peerPort());
-        auto threadId(QString::number((qintptr)QThread::currentThreadId()));
+        auto threadId(QString::number(reinterpret_cast<qintptr>(QThread::currentThreadId())));
         
         QString addString(peerAddress.toString());
         QString msg(QString::fromLocal8Bit("####系统消息：产生了一个新连接,来自：%1 端口: %2\n")

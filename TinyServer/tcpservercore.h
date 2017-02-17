@@ -23,7 +23,6 @@ namespace TcpserverCore
     class TcpConnectionHandler;
     
     QString exchangeIPV6ToDottedDecimal(const Q_IPV6ADDR &ipv6);
-    QString getSocketErrorType(QAbstractSocket::SocketError error);
     
     class TcpServerListendCore : public QTcpServer
     {
@@ -108,6 +107,7 @@ namespace TcpserverCore
         
         bool _isConnected = false;
         bool _waitingForWholeData = false;
+        bool _isReading = false;
         qint64 _currentRead = 0; 
         qint32 _targetLength = 0;
         TcpHeaderFrameHelper::TcpHeaderFrame _headerFrame;
@@ -128,7 +128,7 @@ namespace TcpserverCore
         Q_OBJECT
         friend class TcpServerListendCore;
     public:
-        enum { PULSEINTERVAL = 10000, LOGINCHECK_TIMEOUT = 8000, MAXBUFSIZE = INT32_MAX };
+        enum { PULSEINTERVAL = 10000, LOGINCHECK_TIMEOUT = 8000 };
         using SocketCorePointer = QSharedPointer<TcpServerSocketCore>;
         
     signals:
@@ -166,7 +166,6 @@ namespace TcpserverCore
         
         SocketCorePointer socket;
         QSharedPointer<QTimer> pulseTimer;
-        QSharedPointer<QTimer> loginCheckTimer;
         QSharedPointer<QTimer> _secondsCounter;
         int connectionTime = 0;
         

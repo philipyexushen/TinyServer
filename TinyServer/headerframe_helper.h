@@ -28,8 +28,12 @@ namespace TcpserverCore
             ACK = 128,
             //坐标位置
             Coordinate = 256,
+            //求救信息
+            Help = 512,
+            //ACK应答心跳包
+            ACKPulse = 1024,
             //其他我还没想好的信息
-            Other = 512
+            Other = 2048
         };
         
         struct TcpHeaderFrame

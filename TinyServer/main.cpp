@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     
     if (!serverIsRunning(serverName))
     {
-        QMessageBox::information(NULL,QString::fromLocal8Bit("TinyServer"),QString::fromUtf8("服务器已经启动"));
+        QMessageBox::information(NULL,QString::fromLocal8Bit("TinyServer"),QString::fromLocal8Bit("服务器已经启动"));
         return -1;
     }
     

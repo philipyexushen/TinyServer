@@ -137,7 +137,7 @@ namespace MainWindows
         QSharedPointer<ListendPortDialog> listenedPortListView;
         
         QList<quint16> settingsPortList;
-        QList<int> settingsPulseList;
+        QList<qint32> settingsPulseList;
         qint32 settingsSumOfPort;
         
         int defWidth = DEFWIDTH, defHeight = DEFHEIGHT;
