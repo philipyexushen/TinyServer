@@ -9,7 +9,7 @@
 
 namespace ServerTrayIcon
 {    
-#define TOOLTIP "多线程Tcp服务器v1.32 -by Philip"
+#define TOOLTIP "多线程Tcp服务器v1.34 -by Philip"
     
     class TrayIconManager :public QSystemTrayIcon
     {

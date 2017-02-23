@@ -1,6 +1,8 @@
 #TinyServer
 This is a multi-thread server which is the component of my project.  
  
++ February 24 2017 v1.34   
+ 1. Fix bugs 
 + February 4 2017 v1.33   
  1. Fix bugs 
  2. Add coordinate transitor
